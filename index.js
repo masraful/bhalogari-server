@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const port = process.env.PORT || 5000;
 require('dotenv').config();
-const stripe = require("stripe")("sk_test_51M6dPbA3ZG4diIzk2ukgq0msGkZgI2YLiWiOYfO7sUE5NSLsR6enbNdMfGVuALGhyiliWC7tnXnmmSLkTmfYikb300oV4w1iRW");
+const stripe = require("stripe")(process.env.PAYMENT_KEY);
 // console.log(stripe)
 
 const app = express()
@@ -26,6 +26,7 @@ async function run() {
         const userCollection = client.db('Resale').collection('users')
         const newServicesCollection = client.db('Resale').collection('addnewservices')
         const paymentsCollection = client.db('Resale').collection('payments')
+        const commentsCollection = client.db('Resale').collection('comments')
 
 
         app.get('/category', async (req, res) => {
@@ -80,6 +81,11 @@ async function run() {
             res.send(users)
 
         });
+        app.post('/comments', async (req, res) => {
+            const comments = req.body
+            const result = await commentsCollection.insertOne(comments)
+            res.send(result)
+        })
         app.get('/bookPayment/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
@@ -96,6 +102,11 @@ async function run() {
         app.get('/allusers', async (req, res) => {
             const query = {};
             const users = await userCollection.find(query).toArray();
+            res.send(users)
+        });
+        app.get('/comments', async (req, res) => {
+            const query = {};
+            const users = await commentsCollection.find(query).toArray();
             res.send(users)
         });
 
